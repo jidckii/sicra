@@ -11,7 +11,7 @@ import (
 
 func main() {
 	asyncScan := flag.Bool("async", false, "Run async requests")
-	delay := flag.Int64("delay", 0, "Delay between requests in second")
+	delay := flag.Int64("delay", 0, "Delay between requests in Millisecond")
 	maxDepth := flag.Int("max-depth", 0, "MaxDepth limits the recursion depth of visited URLs.")
 	paralScan := flag.Int("parallel", 0, "Parallelism is the number of the maximum allowed concurrent requests")
 	scrapURL := flag.String("url", "http://example.com", "URL for scraping")

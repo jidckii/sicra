@@ -5,7 +5,7 @@ build:
 ```
 go get -u github.com/gocolly/colly/...
 
-go get github.com/jidckii/sicra
+go get github.com/jidckii/sicra/...
 cd $GOPATH/src/github.com/jidckii/sicra
 go build -o build/sicra main.go
 ```
@@ -17,7 +17,7 @@ Usage of build/sicra:
   -async
         Run async requests
   -delay int
-        Delay between requests in second
+        Delay between requests in Millisecond
   -max-depth int
         MaxDepth limits the recursion depth of visited URLs.
   -parallel int

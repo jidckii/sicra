@@ -34,9 +34,9 @@ func Crawler(
 	c.SetRequestTimeout(time.Duration(timeoutResp) * time.Second)
 
 	c.Limit(&colly.LimitRule{
-		DomainGlob:  allowDomain + "/*",
-		Delay:       time.Duration(delay) * time.Second,
-		RandomDelay: time.Duration(delay) * time.Second,
+		DomainGlob:  allowDomain,
+		Delay:       time.Duration(delay) * time.Millisecond,
+		RandomDelay: time.Duration(delay) * time.Millisecond,
 		Parallelism: paralScan,
 	})
 
