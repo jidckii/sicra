@@ -29,5 +29,7 @@ Usage of build/sicra:
   -v    Verbose visiting URL
 ```
 
-Example: 
-`build/sicra -url http://go-colly.org/ -timeout=60 -parallel=1 -delay=60 -v=true`
+Example:  
+```
+build/sicra -url http://go-colly.org/ -timeout=60 -parallel=1 -delay=60 -v=true
+```
