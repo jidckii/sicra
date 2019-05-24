@@ -3,6 +3,8 @@ Simple crawler and sitemap generator in golang
 
 build:  
 ```
+go get -u github.com/gocolly/colly/...
+
 go get github.com/jidckii/sicra
 cd $GOPATH/src/github.com/jidckii/sicra
 go build -o build/sicra main.go
