@@ -1,7 +1,6 @@
 package sicra
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -43,7 +42,7 @@ func Crawler(
 
 	c.OnRequest(func(r *colly.Request) {
 		if verbose {
-			log.Println("Request: ", r.URL.String())
+			log.Println("Request:", r.URL.String())
 		}
 		ulrCounts.AllVisitURLs++
 	})
@@ -57,7 +56,7 @@ func Crawler(
 
 	c.OnResponse(func(re *colly.Response) {
 		ulrCounts.ResponseURLs++
-		fmt.Println("Response: " + re.Request.URL.String())
+		log.Println("Response:" + re.Request.URL.String())
 	})
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
