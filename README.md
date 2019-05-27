@@ -3,11 +3,7 @@ Simple crawler and sitemap generator in golang
 
 build:  
 ```
-go get -u github.com/gocolly/colly/...
-
-go get github.com/jidckii/sicra/...
-cd $GOPATH/src/github.com/jidckii/sicra
-go build -o build/sicra main.go
+make
 ```
 Run:
 ```
@@ -39,5 +35,5 @@ Usage of build/sicra:
 
 Example:  
 ```
-build/sicra -url http://go-colly.org/ -timeout=60 -parallel=1 -delay=60 -v=true
+build/linux/amd64/sicra -url http://go-colly.org -uri-filter="/docs" -timeout=60 -parallel=1 -delay=1000 -v=true 
 ```
