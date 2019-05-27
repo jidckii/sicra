@@ -2,35 +2,49 @@ package sicra
 
 import (
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/gocolly/colly"
 )
 
-type scrapeCounts struct {
-	AllVisitURLs int
-	NoIndexURLs  int
-	AddedURLs    int
-	ResponseURLs int
-	ErrorURLs    int
+type scrapeURL struct {
+	AddedURLs         []string
+	AddedURLsCount    int
+	AllVisitURLsCount int
+	ErrorURLsCount    int
+	NoIndexURLsCount  int
+	NoIndexURLs       []string
+	ResponseURLsCount int
 }
 
-// Принимает на вход параметры для сканирования, возвращает колличесво посещённых, пропущенных к добавлению и добавленных.
+// Crawler takes as input the parameters to scan.
+// Returns URL scanning statistics
+// and a list of links for sitemap generation.
+// By default, pages containing 'meta name = "googlebot" content = "noindex"' are ignored
 func Crawler(
-	scrapURL, userAgent, allowDomain string,
+	scrapURL, userAgent, allowDomain, uriFilter string,
 	paralScan, maxDepth, timeoutResp int,
 	delay int64,
-	asyncScan, verbose bool,
-) *scrapeCounts {
+	asyncScan, skipNoIndex, verbose bool,
+) *scrapeURL {
 
-	ulrCounts := scrapeCounts{}
-
+	scrapeURLs := new(scrapeURL)
+	filter := "http(s)?://" + allowDomain
+	if uriFilter != "" {
+		filter = "http(s)?://" + allowDomain + uriFilter
+	}
 	c := colly.NewCollector(
 		colly.UserAgent(userAgent),
 		colly.AllowedDomains(allowDomain),
 		colly.MaxDepth(maxDepth),
 		colly.Async(asyncScan),
+		colly.URLFilters(
+			regexp.MustCompile("http(s)?://"+allowDomain+"(/)?$"),
+			regexp.MustCompile(filter),
+		),
 	)
+
 	c.SetRequestTimeout(time.Duration(timeoutResp) * time.Second)
 
 	c.Limit(&colly.LimitRule{
@@ -44,18 +58,18 @@ func Crawler(
 		if verbose {
 			log.Println("Request:", r.URL.String())
 		}
-		ulrCounts.AllVisitURLs++
+		scrapeURLs.AllVisitURLsCount++
 	})
 
-	c.OnError(func(_ *colly.Response, err error) {
+	c.OnError(func(er *colly.Response, err error) {
 		if verbose {
-			log.Println("Error:", err)
+			log.Println("Error:", err, er.Request.URL.String())
 		}
-		ulrCounts.ErrorURLs++
+		scrapeURLs.ErrorURLsCount++
 	})
 
 	c.OnResponse(func(re *colly.Response) {
-		ulrCounts.ResponseURLs++
+		scrapeURLs.ResponseURLsCount++
 		log.Println("Response:" + re.Request.URL.String())
 	})
 
@@ -65,17 +79,20 @@ func Crawler(
 
 	// meta name="googlebot" content="noindex"
 	c.OnHTML("html", func(e *colly.HTMLElement) {
-		metaNoindex := e.ChildAttr(`meta[name="googlebot"]`, "content")
-		if metaNoindex != "noindex" {
-			ulrCounts.AddedURLs++
-			if verbose {
-				// log.Println("Added: " + e.Request.URL.String())
+		requesturl := e.Request.URL.String()
+		if skipNoIndex {
+			metaNoindex := e.ChildAttr(`meta[name="googlebot"]`, "content")
+			if metaNoindex != "noindex" {
+				add(requesturl, verbose, scrapeURLs)
+			} else {
+				scrapeURLs.NoIndexURLsCount++
+				scrapeURLs.NoIndexURLs = append(scrapeURLs.NoIndexURLs, requesturl)
+				if verbose {
+					log.Println("Skiped: " + requesturl)
+				}
 			}
 		} else {
-			ulrCounts.NoIndexURLs++
-			if verbose {
-				// log.Println("Skiped: " + e.Request.URL.String())
-			}
+			add(requesturl, verbose, scrapeURLs)
 		}
 	})
 
@@ -83,5 +100,14 @@ func Crawler(
 	c.Visit(scrapURL)
 	c.Wait()
 
-	return &ulrCounts
+	return scrapeURLs
+}
+
+// Add AddedURLs in struct scrapeURL
+func add(url string, verbose bool, scrapeURLs *scrapeURL) {
+	scrapeURLs.AddedURLsCount++
+	scrapeURLs.AddedURLs = append(scrapeURLs.AddedURLs, url)
+	if verbose {
+		log.Println("Added: " + url)
+	}
 }
