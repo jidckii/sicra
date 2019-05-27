@@ -1,5 +1,5 @@
 # sicra
-Simple crawler and sitemap generator in golang
+Simple crawler and sitemap generator on golang
 
 build:  
 ```
