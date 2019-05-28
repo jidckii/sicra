@@ -2,6 +2,7 @@ package sicra
 
 import (
 	"log"
+	"net/url"
 	"regexp"
 	"time"
 
@@ -81,7 +82,7 @@ func Crawler(
 
 	// meta name="googlebot" content="noindex"
 	c.OnHTML("html", func(e *colly.HTMLElement) {
-		requesturl := e.Request.URL.String()
+		requesturl := urlEscape(e.Request.URL.String())
 		if skipNoIndex {
 			metaNoindex := e.ChildAttr(`meta[name="googlebot"]`, "content")
 			if metaNoindex != "noindex" {
@@ -112,4 +113,19 @@ func add(url string, verbose bool, scrapeURLs *scrapeURL) {
 	if verbose {
 		log.Println("Added: " + url)
 	}
+}
+
+// Escape URL
+func urlEscape(refurl string) string {
+	parseURL, err := url.Parse(refurl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	scheme := parseURL.Scheme
+	host := parseURL.Host
+	pathuri := parseURL.EscapedPath()
+	query := url.QueryEscape(parseURL.RawQuery)
+
+	escapeURL := (scheme + "://" + host + pathuri + "?" + query)
+	return escapeURL
 }

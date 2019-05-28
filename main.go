@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"path/filepath"
 
 	"github.com/jidckii/sicra/sicra"
 )
@@ -41,9 +42,17 @@ func main() {
 		*skipNoIndex,
 		*verbose)
 
-	sicra.GenerateSiteMap(*outFile, scrape.AddedURLs)
+	err = sicra.GenerateSiteMap(*outFile, scrape.AddedURLs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if *skipNoIndex {
-		sicra.GenerateNoIndex("./noindex.txt", scrape.NoIndexURLs)
+		p := filepath.Dir(*outFile)
+		err = sicra.GenerateNoIndex(p+"/noindex.txt", scrape.NoIndexURLs)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	fmt.Print(
