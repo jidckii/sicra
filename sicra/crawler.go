@@ -125,7 +125,13 @@ func urlEscape(refurl string) string {
 	host := parseURL.Host
 	pathuri := parseURL.EscapedPath()
 	query := url.QueryEscape(parseURL.RawQuery)
-
-	escapeURL := (scheme + "://" + host + pathuri + "?" + query)
+	if query != "" {
+		query = "?" + query
+	}
+	fragment := url.QueryEscape(parseURL.Fragment)
+	if fragment != "" {
+		fragment = "#" + fragment
+	}
+	escapeURL := (scheme + "://" + host + pathuri + query + fragment)
 	return escapeURL
 }
