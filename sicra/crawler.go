@@ -70,7 +70,9 @@ func Crawler(
 
 	c.OnResponse(func(re *colly.Response) {
 		scrapeURLs.ResponseURLsCount++
-		log.Println("Response:" + re.Request.URL.String())
+		if verbose {
+			log.Println("Response: " + re.Request.URL.String())
+		}
 	})
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
