@@ -1,3 +1,5 @@
+PLATFORMS=darwin linux windows
+
 default: deps build
 deps:
 	@echo "==> Updating build dependencies..."
@@ -5,7 +7,8 @@ deps:
 
 build:
 	@echo "==> Building for all platforms..."
-	GOOS=linux GOARCH=amd64 go build -o build/sicra
-	tar -czf build/sicra-linux-amd64.tar.gz build/sicra
+	$(foreach GOOS, $(PLATFORMS),\
+	$(shell GOOS=$(GOOS) GOARCH=amd64 go build -o build/$(GOOS)/sicra && \
+	tar -czf build/sicra-$(GOOS)-amd64.tar.gz build/$(GOOS)/sicra))
 
 .PHONY: deps build
