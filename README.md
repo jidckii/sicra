@@ -3,6 +3,7 @@ Simple crawler and sitemap generator on golang
 
 build:  
 ```
+go get -u github.com/jidckii/sicra/...
 make
 ```
 Run:
