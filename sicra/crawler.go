@@ -24,16 +24,20 @@ type scrapeURL struct {
 // and a list of links for sitemap generation.
 // By default, pages containing 'meta name = "googlebot" content = "noindex"' are ignored
 func Crawler(
-	scrapURL, userAgent, allowDomain, uriFilter string,
+	scrapURL, userAgent, allowDomain, baseAuth, uriFilter string,
 	paralScan, maxDepth, timeoutResp int,
 	delay int64,
 	asyncScan, skipNoIndex, verbose bool,
 ) *scrapeURL {
 
 	scrapeURLs := new(scrapeURL)
-	filter := "http(s)?://" + allowDomain
+	allowDomainFilter := "http(s)?://" + allowDomain
+	if baseAuth != "" {
+		allowDomainFilter = "http(s)?://" + baseAuth + "@" + allowDomain
+	}
+	filter := allowDomainFilter
 	if uriFilter != "" {
-		filter = "http(s)?://" + allowDomain + uriFilter
+		filter = allowDomainFilter + uriFilter
 	}
 	c := colly.NewCollector(
 		colly.UserAgent(userAgent),
@@ -41,7 +45,7 @@ func Crawler(
 		colly.MaxDepth(maxDepth),
 		colly.Async(asyncScan),
 		colly.URLFilters(
-			regexp.MustCompile("http(s)?://"+allowDomain+"(/)?$"),
+			regexp.MustCompile(allowDomainFilter+"(/)?$"),
 			regexp.MustCompile(filter),
 		),
 	)

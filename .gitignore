@@ -1,4 +1,4 @@
 build/
 *.xml
 *.txt
-test.go
+var/

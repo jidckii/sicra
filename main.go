@@ -28,11 +28,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	hostname := parsedURL.Hostname()
+	baseAuth := parsedURL.User.String()
 
 	scrape := sicra.Crawler(
 		*scrapURL,
 		*userAgent,
-		parsedURL.Hostname(),
+		hostname,
+		baseAuth,
 		*uriFilter,
 		*paralScan,
 		*maxDepth,
