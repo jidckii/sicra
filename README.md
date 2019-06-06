@@ -11,18 +11,22 @@ Run:
 build/sicra -h
 
 Usage of build/sicra:
+  -add-error
+        Add URL to sitemap, even if response error (default true)
   -async
         Run async requests
   -delay int
         Delay between requests in Millisecond
   -max-depth int
         MaxDepth limits the recursion depth of visited URLs.
+  -noindex-rule string
+        Comma-separated list of parameters as a string (default "noindex,nofollow")
   -outfile string
         Out sitemap file (default "./sitemap.xml")
   -parallel int
         Parallelism is the number of the maximum allowed concurrent requests
   -skip-noindex
-        Do not add link to sitemap if it contains: 'meta name = "googlebot" content = "noindex"' (default true)
+        Do not add link to sitemap if it contains: 'meta name="robots" content="noindex,nofollow"' (default true)
   -timeout int
         Response timeout in second (default 10)
   -uri-filter string
