@@ -22,12 +22,12 @@ type scrapeURL struct {
 // Crawler takes as input the parameters to scan.
 // Returns URL scanning statistics
 // and a list of links for sitemap generation.
-// By default, pages containing 'meta name = "googlebot" content = "noindex"' are ignored
+// By default, pages containing 'meta name="robots" content="noindex,nofollow"' are ignored
 func Crawler(
-	scrapURL, userAgent, allowDomain, baseAuth, uriFilter string,
+	scrapURL, userAgent, allowDomain, baseAuth, uriFilter, noIndexRule string,
 	paralScan, maxDepth, timeoutResp int,
 	delay int64,
-	asyncScan, skipNoIndex, verbose bool,
+	asyncScan, addError, skipNoIndex, verbose bool,
 ) *scrapeURL {
 
 	scrapeURLs := new(scrapeURL)
@@ -67,8 +67,12 @@ func Crawler(
 	})
 
 	c.OnError(func(er *colly.Response, err error) {
+		requestURL := urlEscape(er.Request.URL.String())
 		if verbose {
-			log.Println("Error:", err, er.Request.URL.String())
+			log.Println("Error:", err, requestURL)
+		}
+		if addError {
+			add(requestURL, verbose, scrapeURLs)
 		}
 		scrapeURLs.ErrorURLsCount++
 	})
@@ -84,22 +88,22 @@ func Crawler(
 		c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
 	})
 
-	// meta name="googlebot" content="noindex"
+	// meta name="robots" content="noindex,nofollow"
 	c.OnHTML("html", func(e *colly.HTMLElement) {
-		requesturl := urlEscape(e.Request.URL.String())
+		requestURL := urlEscape(e.Request.URL.String())
 		if skipNoIndex {
-			metaNoindex := e.ChildAttr(`meta[name="googlebot"]`, "content")
-			if metaNoindex != "noindex" {
-				add(requesturl, verbose, scrapeURLs)
+			metaNoindex := e.ChildAttr(`meta[name="robots"]`, "content")
+			if metaNoindex != noIndexRule {
+				add(requestURL, verbose, scrapeURLs)
 			} else {
 				scrapeURLs.NoIndexURLsCount++
-				scrapeURLs.NoIndexURLs = append(scrapeURLs.NoIndexURLs, requesturl)
+				scrapeURLs.NoIndexURLs = append(scrapeURLs.NoIndexURLs, requestURL)
 				if verbose {
-					log.Println("Skiped: " + requesturl)
+					log.Println("Skiped: " + requestURL)
 				}
 			}
 		} else {
-			add(requesturl, verbose, scrapeURLs)
+			add(requestURL, verbose, scrapeURLs)
 		}
 	})
 
@@ -127,7 +131,7 @@ func urlEscape(refurl string) string {
 	}
 	scheme := parseURL.Scheme
 	host := parseURL.Host
-	pathuri := parseURL.EscapedPath()
+	pathuri := parseURL.Path
 	query := url.QueryEscape(parseURL.RawQuery)
 	if query != "" {
 		query = "?" + query
