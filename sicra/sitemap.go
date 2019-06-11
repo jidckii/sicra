@@ -24,7 +24,7 @@ func GenerateSiteMap(fileName string, urls []string) error {
 	for _, loc := range urls {
 		fh.WriteString("    " + "<url>\n")
 		fh.WriteString("      " + "<loc>" + loc + "</loc>\n")
-		fh.WriteString("      " + "<changefreq>" + currentTime + "</changefreq>\n")
+		fh.WriteString("      " + "<lastmod>" + currentTime + "</lastmod>\n")
 		fh.WriteString("      " + "<changefreq>hourly</changefreq>\n")
 		fh.WriteString("      " + "<priority>0.5</priority>\n")
 		fh.WriteString("    " + "</url>\n")
@@ -34,7 +34,8 @@ func GenerateSiteMap(fileName string, urls []string) error {
 	return nil
 }
 
-func GenerateNoIndex(fileName string, urls []string) error {
+// GenerateTxt generate txt file for error list url or skiped  noindex
+func GenerateTxt(fileName string, urls []string) error {
 	err := deleteFileIfExists(fileName)
 	if err != nil {
 		log.Fatal(err)

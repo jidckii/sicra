@@ -12,7 +12,7 @@ build/sicra -h
 
 Usage of build/sicra:
   -add-error
-        Add URL to sitemap, even if response error (default true)
+        Add URL to sitemap, even if response error (only for 5xx codes) (default true)
   -async
         Run async requests
   -delay int

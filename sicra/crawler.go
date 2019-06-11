@@ -1,9 +1,11 @@
 package sicra
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -13,9 +15,10 @@ type scrapeURL struct {
 	AddedURLs         []string
 	AddedURLsCount    int
 	AllVisitURLsCount int
+	ErrorURLs         []string
 	ErrorURLsCount    int
-	NoIndexURLsCount  int
 	NoIndexURLs       []string
+	NoIndexURLsCount  int
 	ResponseURLsCount int
 }
 
@@ -68,13 +71,19 @@ func Crawler(
 
 	c.OnError(func(er *colly.Response, err error) {
 		requestURL := urlEscape(er.Request.URL.String())
+		r := regexp.MustCompile("^5[0-9]{1,2}$")
+		statusCode := strconv.Itoa(er.StatusCode)
+		strErr := fmt.Sprint(err)
 		if verbose {
 			log.Println("Error:", err, requestURL)
 		}
 		if addError {
-			add(requestURL, verbose, scrapeURLs)
+			if r.MatchString(statusCode) {
+				add(requestURL, verbose, scrapeURLs)
+			}
 		}
 		scrapeURLs.ErrorURLsCount++
+		scrapeURLs.ErrorURLs = append(scrapeURLs.ErrorURLs, statusCode+" "+strErr+" "+requestURL)
 	})
 
 	c.OnResponse(func(re *colly.Response) {
